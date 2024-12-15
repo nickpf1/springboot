@@ -19,7 +19,7 @@ public class ParquetController {
 
     public record Column(String name, String type) {}
 
-    public record Query(){}
+    public record Result(String column, String value){}
 
     @GetMapping("/schema")
     public ResponseEntity<SchemaResponse> schema() throws SQLException {
@@ -37,7 +37,7 @@ public class ParquetController {
     }
 
     @GetMapping("")
-    public ResponseEntity<Query> query(
+    public ResponseEntity<List<Result>> query(
             @RequestParam("table") String table,
             @RequestParam("cols") List<String> columns
     ) throws SQLException
@@ -49,12 +49,13 @@ public class ParquetController {
 
         ResultSet rs = stmt.executeQuery(sql);
         ResultSetMetaData metaData = rs.getMetaData();
+        List<Result> results = new ArrayList<>();
         while (rs.next()) {
             for (int i = 1; i <= metaData.getColumnCount(); i++) {
-                System.out.println(metaData.getColumnName(i) + " -> " +rs.getString(i));
+                results.add(new Result(metaData.getColumnName(i), rs.getString(i)));
             }
 
         }
-        return null;
+        return ResponseEntity.ok(results);
     }
 }

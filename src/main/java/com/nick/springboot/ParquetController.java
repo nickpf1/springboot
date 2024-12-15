@@ -1,13 +1,17 @@
 package com.nick.springboot;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,11 +19,14 @@ import java.util.List;
 @RequestMapping("/v1/parquet")
 public class ParquetController {
 
-    public record SchemaResponse(String table, List<Column> column) {}
+    public record SchemaResponse(String table, List<Column> column) {
+    }
 
-    public record Column(String name, String type) {}
+    public record Column(String name, String type) {
+    }
 
-    public record Result(String column, String value){}
+    public record Result(String column, String value) {
+    }
 
     @GetMapping("/schema")
     public ResponseEntity<SchemaResponse> schema() throws SQLException {
@@ -40,8 +47,7 @@ public class ParquetController {
     public ResponseEntity<List<Result>> query(
             @RequestParam("table") String table,
             @RequestParam("cols") List<String> columns
-    ) throws SQLException
-    {
+    ) throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:duckdb:src/main/resources/my-db");
         Statement stmt = conn.createStatement();
         String sql = "select %s from %s".formatted(columns.toString().replace("[", "").replace("]", ""), table);
